@@ -13,50 +13,68 @@ datasource db {
   provider = "postgresql"
 }
 
-
 model User {
-  id      String @id @default(uuid())
-  company String @unique
-  email   String @unique
-  password String
+  id        String   @id @default(uuid())
+  company   String   @unique
+  email     String   @unique
+  password  String
   createdAt DateTime @default(now())
+
+  items  Item[]
+  orders Order[]
 
   @@map("users")
 }
 
 model Item {
-  id    String @id @default(uuid())
-  name  String
-  price Float
-  image String?
+  id        String   @id @default(uuid())
+  name      String
+  price     Float
+  image     String?
   createdAt DateTime @default(now())
 
   order_items Order_item[]
 
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+
   @@map("items")
+  @@unique([id, ownerId])
 }
 
 model Order {
-  id    String    @id @default(uuid())
-  items Order_item[]
-  total Float
-  createdAt DateTime @default(now())
+  id        String       @id @default(uuid())
+  items     Order_item[]
+  total     Float
+  createdAt DateTime     @default(now())
+
+  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
 
   @@map("orders")
+  @@unique([id, ownerId])
 }
 
 model Order_item {
-  id    String    @id @default(uuid())
-  quantity Int
+  id             String  @id @default(uuid())
+  quantity       Int
   price_at_order Float
-  name_at_order String
+  name_at_order  String
   image_at_order String?
 
-  item Item @relation(fields: [itemId], references: [id])
+  item   Item   @relation(fields: [itemId], references: [id])
   itemId String
 
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
   orderId String
 
   @@map("order_items")
+}
+
+model session {
+  sid    String   @id @db.VarChar
+  sess   Json     @db.Json
+  expire DateTime @db.Timestamp(6)
+
+  @@index([expire], map: "IDX_session_expire")
 }
