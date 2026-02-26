@@ -45,7 +45,7 @@ model Item {
 model Order {
   id        String       @id @default(uuid())
   items     Order_item[]
-  total     Float
+  total     Float        @default(0)
   createdAt DateTime     @default(now())
 
   owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
@@ -57,7 +57,7 @@ model Order {
 
 model Order_item {
   id             String  @id @default(uuid())
-  quantity       Int
+  quantity       Int     @default(1)
   price_at_order Float
   name_at_order  String
   image_at_order String?
@@ -69,6 +69,7 @@ model Order_item {
   orderId String
 
   @@map("order_items")
+  @@unique([itemId, orderId])
 }
 
 model session {
