@@ -22,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 const sessionMiddleware = session({
   store: new pgSession({
     conString: process.env.DATABASE_URL,
-    createTableIfMissing: true,
+    createTableIfMissing: false,
   }),
   secret: process.env.SESSION_SECRET,
   resave: false,
@@ -44,8 +44,14 @@ app.use(passport.session());
 
 const { requireAuth } = require("./modules/auth/auth.middleware");
 const authRoutes = require("./modules/auth/auth.routes");
+const itemRoutes = require("./modules/items/item.routes");
+const order_item_routes = require("./modules/order_items/order_item.routes");
+const orderRoutes = require("./modules/orders/order.routes");
 
 app.use("/api/auth", authRoutes);
+app.use("/api/items", requireAuth, itemRoutes);
+app.use("/api/order_item", requireAuth, order_item_routes);
+app.use("/api/orders", requireAuth, orderRoutes);
 
 app.use(errorHandler);
 
