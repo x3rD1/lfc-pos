@@ -18,7 +18,7 @@ app.use(cors({ origin: `${process.env.FRONTEND_URL}`, credentials: true }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// app.set("trust proxy", 1);
+app.set("trust proxy", 1);
 const sessionMiddleware = session({
   store: new pgSession({
     conString: process.env.DATABASE_URL,
@@ -47,14 +47,19 @@ const authRoutes = require("./modules/auth/auth.routes");
 const itemRoutes = require("./modules/items/item.routes");
 const order_item_routes = require("./modules/order_items/order_item.routes");
 const orderRoutes = require("./modules/orders/order.routes");
+const uploadRoutes = require("./modules/uploads/upload.routes");
+const dashboardRoutes = require("./modules/dashboard/dashboard.routes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/items", requireAuth, itemRoutes);
 app.use("/api/order_item", requireAuth, order_item_routes);
 app.use("/api/orders", requireAuth, orderRoutes);
+app.use("/api/upload", requireAuth, uploadRoutes);
+app.use("/api/dashboard", requireAuth, dashboardRoutes);
 
 app.use(errorHandler);
 
+const PORT = process.env.PORT || 3000;
 app.listen(3000, () => {
   console.log("App is listening to port 3000");
 });
