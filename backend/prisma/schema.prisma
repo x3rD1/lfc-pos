@@ -1,12 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  provider        = "prisma-client-js"
+  output          = "../generated/prisma"
+  previewFeatures = ["partialIndexes"]
 }
 
 datasource db {
@@ -19,57 +14,58 @@ model User {
   email     String   @unique
   password  String
   createdAt DateTime @default(now())
-
-  items  Item[]
-  orders Order[]
+  items     Item[]
+  orders    Order?
 
   @@map("users")
 }
 
 model Item {
-  id        String   @id @default(uuid())
-  name      String
-  price     Float
-  image     String?
-  createdAt DateTime @default(now())
-
+  id          String       @id @default(uuid())
+  name        String
+  price       Float
+  mediaUrl    String?
+  mediaId     String?
+  mediaType   String?
+  createdAt   DateTime     @default(now())
+  ownerId     String
+  owner       User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   order_items Order_item[]
 
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId String
-
-  @@map("items")
   @@unique([id, ownerId])
+  @@map("items")
 }
 
 model Order {
   id        String       @id @default(uuid())
-  items     Order_item[]
   total     Float        @default(0)
+  status    OrderStatus  @default(OPEN)
   createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  ownerId   String       @unique(map: "one_open_order_per_user", where: raw("(status = 'OPEN'::\"OrderStatus\")"))
+  items     Order_item[]
+  owner     User         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
 
-  owner   User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  ownerId String
-
+  @@index([ownerId, status])
   @@map("orders")
-  @@unique([id, ownerId])
 }
 
 model Order_item {
-  id             String  @id @default(uuid())
-  quantity       Int     @default(1)
-  price_at_order Float
-  name_at_order  String
-  image_at_order String?
+  id                 String   @id @default(uuid())
+  quantity           Int      @default(1)
+  price_at_order     Float
+  name_at_order      String
+  mediaUrl_at_order  String?
+  mediaId_at_order   String?
+  mediaType_at_order String?
+  createdAt          DateTime @default(now())
+  itemId             String?
+  orderId            String
+  item               Item?    @relation(fields: [itemId], references: [id])
+  order              Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 
-  item   Item   @relation(fields: [itemId], references: [id])
-  itemId String
-
-  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId String
-
-  @@map("order_items")
   @@unique([itemId, orderId])
+  @@map("order_items")
 }
 
 model session {
@@ -78,4 +74,10 @@ model session {
   expire DateTime @db.Timestamp(6)
 
   @@index([expire], map: "IDX_session_expire")
+}
+
+enum OrderStatus {
+  OPEN
+  PAID
+  COMPLETED
 }
