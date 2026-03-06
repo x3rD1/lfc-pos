@@ -2,7 +2,6 @@ const authService = require("./auth.service");
 const passport = require("../../../lib/passport");
 
 exports.getMe = async (req, res, next) => {
-  console.log(req.user);
   res.json(req.user);
 };
 
