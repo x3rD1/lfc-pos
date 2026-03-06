@@ -7,10 +7,14 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   const refreshUser = async () => {
-    getMe()
-      .then((res) => setUser(res))
-      .catch(() => setUser(null))
-      .finally(() => setLoading(false));
+    try {
+      const res = await getMe();
+      setUser(res);
+    } catch {
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
