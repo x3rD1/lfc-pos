@@ -22,7 +22,7 @@ function Dashboard() {
   const formatPercentage = (value) => {
     if (value === null || value === undefined) return "0%";
     const sign = value >= 0 ? "+" : "";
-    return `${sign}${value}%`;
+    return `${sign}${value.toFixed(2)}%`;
   };
 
   const getComparisonClass = (value) => {
@@ -40,20 +40,17 @@ function Dashboard() {
   };
 
   const getPeakTimeToday = () => {
-    if (!metrics?.order_over_time?.today) return "--:--";
-    const orders = metrics.order_over_time.today;
-    let maxHour = 0;
-    let maxTotal = -1;
-    orders.forEach((order) => {
-      if (order.total > maxTotal) {
-        maxTotal = order.total;
-        maxHour = order.hour;
-      }
-    });
-    if (maxTotal === 0) return "--:--";
-    const ampm = maxHour >= 12 ? "PM" : "AM";
-    const hour12 = maxHour % 12 || 12;
-    return `${hour12}:00 ${ampm}`;
+    if (!metrics?.peak_ordering_time?.today) return "--:--";
+    const time = metrics.peak_ordering_time.today;
+
+    const [hoursStr, minutesStr] = time.split(":");
+    const hours = parseInt(hoursStr, 10);
+    const minutes = parseInt(minutesStr, 10);
+
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+
+    return `${hour12}:${minutes.toString().padStart(2, "0")} ${ampm}`;
   };
 
   const getPeakTimeMonth = () => {
