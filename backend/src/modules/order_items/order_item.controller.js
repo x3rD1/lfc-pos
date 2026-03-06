@@ -20,6 +20,7 @@ exports.update_order_item = async (req, res, next) => {
     const data = {
       itemId: req.params.itemId,
       orderId: req.body.orderId,
+      ownerId: req.user.id,
     };
 
     const updated_order_item = await order_item_service.update_order_item(data);
