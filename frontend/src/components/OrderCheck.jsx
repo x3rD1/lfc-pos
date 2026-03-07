@@ -30,7 +30,7 @@ function OrderCheck() {
   }, []);
 
   return (
-    <div className={styles.checkSection}>
+    <div className={`${styles.checkSection} ${styles.orderCheckWrapper}`}>
       <div className={styles.checkCard}>
         <div className={styles.checkHeader}>
           <div className={styles.checkTitle}>
